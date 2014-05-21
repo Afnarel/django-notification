@@ -14,8 +14,8 @@ class SiteBackend(backends.BaseBackend):
 
         extra_context.update({
             "recipient": recipient,
-            "notice_type": notice_type.label,
             "title": ugettext(notice_type.display),
+            "description": ugettext(notice_type.description),
             "from_username": sender.username
         })
 
@@ -31,5 +31,5 @@ class SiteBackend(backends.BaseBackend):
 
         notify.send(
             sender,
-            verb=ugettext(notice_type.description),
+            verb=notice_type.label,
             **extra_context)
