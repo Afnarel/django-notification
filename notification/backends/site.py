@@ -29,8 +29,6 @@ class SiteBackend(backends.BaseBackend):
             'body': messages["notice.html"]
         })
 
-        print sender
-        print dir(sender)
         notify.send(
             sender,
             verb=ugettext(notice_type.description),
