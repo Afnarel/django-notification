@@ -28,7 +28,11 @@ class SiteBackend(backends.BaseBackend):
             'body': messages["notice.html"]
         })
 
+        if not sender:
+            sender = recipient
+
         notify.send(
+            recipient,
             sender,
             verb=notice_type.label,
             **extra_context)
