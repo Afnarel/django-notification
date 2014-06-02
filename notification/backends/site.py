@@ -32,7 +32,6 @@ class SiteBackend(backends.BaseBackend):
             sender = recipient
 
         notify.send(
-            recipient,
             sender,
             verb=notice_type.label,
             **extra_context)
