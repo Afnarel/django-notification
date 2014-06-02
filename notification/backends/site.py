@@ -14,9 +14,9 @@ class SiteBackend(backends.BaseBackend):
 
         extra_context.update({
             "recipient": recipient,
+            "sender": sender,
             "title": ugettext(notice_type.display),
             "description": ugettext(notice_type.description),
-            "from_username": sender.username
         })
 
         # context = self.default_context()
