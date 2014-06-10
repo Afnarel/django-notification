@@ -2,8 +2,11 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext
-
+from smtplib import SMTPException
 from notification import backends
+import logging
+
+logger = logging.getLogger("ignilife")
 
 
 class EmailBackend(backends.BaseBackend):
@@ -39,4 +42,10 @@ class EmailBackend(backends.BaseBackend):
             "message": messages["full.txt"],
         }, context)
 
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient.email])
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
+                      [recipient.email])
+        except SMTPException:
+            logger.error(
+                "Mail could not be sent to email %s (user: %s) for nocice type '%s'" % (
+                    recipient.email, recipient.username))
