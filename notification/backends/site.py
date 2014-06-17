@@ -12,6 +12,9 @@ class SiteBackend(backends.BaseBackend):
 
     def deliver(self, recipient, sender, notice_type, extra_context):
 
+        # If a target is given in the extra_context, retrieve it
+        target = extra_context.pop('target', None)
+
         extra_context.update({
             "recipient": recipient,
             "title": ugettext(notice_type.display),
@@ -34,4 +37,5 @@ class SiteBackend(backends.BaseBackend):
         notify.send(
             sender,
             verb=notice_type.label,
+            target=target,
             **extra_context)
