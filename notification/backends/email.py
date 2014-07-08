@@ -47,5 +47,5 @@ class EmailBackend(backends.BaseBackend):
                       [recipient.email])
         except:
             logger.error(
-                "Mail could not be sent to email %s (user: %s) for nocice type '%s'. Exception: %s" % (
+                "Mail could not be sent to email %s (user: %s) for notice type '%s'. Exception: %s" % (
                     recipient.email, recipient.username, notice_type, sys.exc_info()[0]))
