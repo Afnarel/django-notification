@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.core.mail import send_mail
+# from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext
 from notification import backends
@@ -31,7 +32,8 @@ class EmailBackend(backends.BaseBackend):
 
         messages = self.get_formatted_messages((
             "short.txt",
-            "full.txt"
+            "full.txt",
+            "full.html"
         ), notice_type.label, context)
 
         subject = "".join(render_to_string("notification/email_subject.txt", {
@@ -42,9 +44,19 @@ class EmailBackend(backends.BaseBackend):
             "message": messages["full.txt"],
         }, context)
 
+        body_html = render_to_string("notification/email_body.html", {
+            "message": messages["full.html"],
+        }, context)
+
         try:
-            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
-                      [recipient.email])
+            msg = EmailMultiAlternatives(
+                subject, body, settings.DEFAULT_FROM_EMAIL, [recipient.email])
+            msg.attach_alternative(body_html, "text/html")
+            # msg.content_subtype = "html"  # Main content is now text/html
+            msg.send()
+
+            # send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
+            #           [recipient.email])
         except:
             logger.error(
                 "Mail could not be sent to email %s (user: %s) for notice type '%s'. Exception: %s" % (
