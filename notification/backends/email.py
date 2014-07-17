@@ -52,7 +52,7 @@ class EmailBackend(backends.BaseBackend):
             msg = EmailMultiAlternatives(
                 subject, body, settings.DEFAULT_FROM_EMAIL, [recipient.email])
             msg.attach_alternative(body_html, "text/html")
-            # msg.content_subtype = "html"  # Main content is now text/html
+            msg.content_subtype = "html"  # Main content is now text/html
             msg.send()
 
             # send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
