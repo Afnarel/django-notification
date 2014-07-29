@@ -32,6 +32,8 @@ def notice_settings(request):
     for notice_type in notice_types:
         settings_row = []
         for medium_id, medium_display in NOTICE_MEDIA:
+            if medium_display == 'site':
+                continue
             form_label = "%s_%s" % (notice_type.label, medium_id)
             setting = NoticeSetting.for_user(request.user, notice_type, medium_id)
             if request.method == "POST":
@@ -51,7 +53,8 @@ def notice_settings(request):
         return HttpResponseRedirect(next_page)
 
     settings = {
-        "column_headers": [medium_display for medium_id, medium_display in NOTICE_MEDIA],
+        "column_headers": [medium_display for medium_id, medium_display in
+                           NOTICE_MEDIA if medium_display != 'site'],
         "rows": settings_table,
     }
 
