@@ -12,6 +12,8 @@ class SiteBackend(backends.BaseBackend):
 
     def deliver(self, recipient, sender, notice_type, extra_context):
 
+        extra_context = dict(extra_context)
+
         # If a target is given in the extra_context, retrieve it
         target = extra_context.pop('target', None)
 
