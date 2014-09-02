@@ -55,7 +55,8 @@ def send_all(*args):
                         logging.info("emitting notice {} to {}".format(label, user))
                         # call this once per user to be atomic and allow for logging to
                         # accurately show how long each takes.
-                        if notification.send_now([user], label, extra_context, sender):
+                        if notification.send_now([user], label, extra_context,
+                                sender, delayed=True):
                             sent_actual += 1
                     except User.DoesNotExist:
                         # Ignore deleted users, just warn about them

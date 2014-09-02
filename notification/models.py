@@ -133,7 +133,7 @@ def get_notification_language(user):
     raise LanguageStoreNotAvailable
 
 
-def send_now(users, label, extra_context=None, sender=None):
+def send_now(users, label, extra_context=None, sender=None, delayed=False):
     """
     Creates a new notice.
 
@@ -143,6 +143,9 @@ def send_now(users, label, extra_context=None, sender=None):
         "spam": "eggs",
         "foo": "bar",
     )
+
+    If delayed is True, then the function has been called from the
+    emit_notices command.
     """
     sent = False
     if extra_context is None:
@@ -164,8 +167,19 @@ def send_now(users, label, extra_context=None, sender=None):
             # activate the user's language
             activate(language)
 
-        for backend in NOTIFICATION_BACKENDS.values():
-            if backend.can_send(user, notice_type):
+        for identifier, backend in NOTIFICATION_BACKENDS.items():
+            can_send = True
+            # Make sure that on-site notifications are not sent
+            # a second time by the emit_notices command
+            if delayed and identifier == 'site':
+                can_send = False
+            # Make sure that email notifications are queued
+            # unless the function is called by the emit_notices command
+            elif not delayed and identifier == 'email':
+                queue(users, label, extra_context, sender)
+                can_send = False
+
+            if can_send and backend.can_send(user, notice_type):
                 backend.deliver(user, sender, notice_type, extra_context)
                 sent = True
 
