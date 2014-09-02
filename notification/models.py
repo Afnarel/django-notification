@@ -167,7 +167,8 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False):
             # activate the user's language
             activate(language)
 
-        for identifier, backend in NOTIFICATION_BACKENDS.items():
+        for _identifier, backend in NOTIFICATION_BACKENDS.items():
+            identifier = _identifier[1]
             can_send = True
             # Make sure that on-site notifications are not sent
             # a second time by the emit_notices command
