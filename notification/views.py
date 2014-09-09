@@ -1,6 +1,8 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
+from django.contrib import messages
+from django.utils.translation import ugettext as _
 
 from django.contrib.auth.decorators import login_required
 
@@ -49,6 +51,7 @@ def notice_settings(request):
         settings_table.append({"notice_type": notice_type, "cells": settings_row})
 
     if request.method == "POST":
+        messages.success(request, _(u"Vos données ont bien été enregistrées."))
         next_page = request.POST.get("next_page", ".")
         return HttpResponseRedirect(next_page)
 
