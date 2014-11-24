@@ -12,6 +12,7 @@ logger = logging.getLogger("ignilife")
 
 class MobileBackend(backends.BaseBackend):
     spam_sensitivity = 2
+    synchronous = False
 
     def deliver(self, recipient, sender, notice_type, extra_context):
         from ignilife.management import get_mobile_redirect_on_notification

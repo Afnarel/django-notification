@@ -12,6 +12,7 @@ logger = logging.getLogger("ignilife")
 
 class EmailBackend(backends.BaseBackend):
     spam_sensitivity = 2
+    synchronous = False
 
     def can_send(self, user, notice_type):
         can_send = super(EmailBackend, self).can_send(user, notice_type)

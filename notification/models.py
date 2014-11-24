@@ -128,7 +128,8 @@ def get_notification_language(user):
     """
     if getattr(settings, "NOTIFICATION_LANGUAGE_MODULE", False):
         try:
-            app_label, model_name = settings.NOTIFICATION_LANGUAGE_MODULE.split(".")
+            app_label, model_name = settings.\
+                NOTIFICATION_LANGUAGE_MODULE.split(".")
             model = models.get_model(app_label, model_name)
             # pylint: disable-msg=W0212
             language_model = model._default_manager.get(
@@ -175,17 +176,17 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False):
             activate(language)
 
         for _identifier, backend in NOTIFICATION_BACKENDS.items():
-            identifier = _identifier[1]
-            can_send = True
-            # Make sure that on-site notifications are not sent
-            # a second time by the emit_notices command
-            if delayed and identifier not in settings.QUEUED_NOTIFICATIONS:
-                can_send = False
-            # Make sure that email and mobile notifications are queued
-            # unless the function is called by the emit_notices command
-            elif not delayed and identifier in settings.QUEUED_NOTIFICATIONS:
-                queue(users, label, extra_context, sender)
-                can_send = False
+            # identifier = _identifier[1]
+            can_send = False
+            # The function has been called from the emit_notices command
+            # => we must send the notification for asynchronous backends
+            if delayed and not backend.synchronous:
+                can_send = True
+            # The function has been called from the code to send the
+            # nofification immediately
+            # => we must send the notification for synchronous backends
+            elif not delayed and backend.synchronous:
+                can_send = True
 
             if can_send and backend.can_send(user, notice_type):
                 backend.deliver(user, sender, notice_type, extra_context)
@@ -198,23 +199,13 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False):
 
 def send(*args, **kwargs):
     """
-    A basic interface around both queue and send_now. This honors a global
-    flag NOTIFICATION_QUEUE_ALL that helps determine whether all calls should
-    be queued or not. A per call ``queue`` or ``now`` keyword argument can be
-    used to always override the default global behavior.
+    * Queues the notification so that asynchronous backends can later send
+      it when the emit_notices command is called
+    * Sends the notification using every synchronous backend listed in
+      the settings
     """
-    queue_flag = kwargs.pop("queue", False)
-    now_flag = kwargs.pop("now", False)
-    assert not (queue_flag and now_flag), "'queue' and 'now' cannot both be True."
-    if queue_flag:
-        return queue(*args, **kwargs)
-    elif now_flag:
-        return send_now(*args, **kwargs)
-    else:
-        if QUEUE_ALL:
-            return queue(*args, **kwargs)
-        else:
-            return send_now(*args, **kwargs)
+    queue(*args, **kwargs)
+    return send_now(*args, **kwargs)
 
 
 def queue(users, label, extra_context=None, sender=None):
