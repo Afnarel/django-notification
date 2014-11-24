@@ -40,7 +40,8 @@ class NoticeType(models.Model):
     display = models.CharField(_("display"), max_length=50)
     description = models.CharField(_("description"), max_length=100)
 
-    # by default only on for media with sensitivity less than or equal to this number
+    # By default only on for media with sensitivity less than or
+    # equal to this number
     default = models.IntegerField(_("default"))
 
     def __str__(self):
@@ -55,7 +56,8 @@ class NoticeType(models.Model):
         """
         Creates a new NoticeType.
 
-        This is intended to be used by other apps as a post_syncdb manangement step.
+        This is intended to be used by other apps as a
+        post_syncdb manangement step.
         """
         try:
             notice_type = cls._default_manager.get(label=label)
@@ -74,7 +76,8 @@ class NoticeType(models.Model):
                 if verbosity > 1:
                     print("Updated %s NoticeType" % label)
         except cls.DoesNotExist:
-            cls(label=label, display=display, description=description, default=default).save()
+            cls(label=label, display=display, description=description,
+                default=default).save()
             if verbosity > 1:
                 print("Created %s NoticeType" % label)
 
@@ -98,10 +101,13 @@ class NoticeSetting(models.Model):
     @classmethod
     def for_user(cls, user, notice_type, medium):
         try:
-            return cls._default_manager.get(user=user, notice_type=notice_type, medium=medium)
+            return cls._default_manager.get(
+                user=user, notice_type=notice_type, medium=medium)
         except cls.DoesNotExist:
             default = (NOTICE_MEDIA_DEFAULTS[medium] <= notice_type.default)
-            setting = cls(user=user, notice_type=notice_type, medium=medium, send=default)
+            setting = cls(
+                user=user, notice_type=notice_type, medium=medium,
+                send=default)
             setting.save()
             return setting
 
@@ -125,7 +131,8 @@ def get_notification_language(user):
             app_label, model_name = settings.NOTIFICATION_LANGUAGE_MODULE.split(".")
             model = models.get_model(app_label, model_name)
             # pylint: disable-msg=W0212
-            language_model = model._default_manager.get(user__id__exact=user.id)
+            language_model = model._default_manager.get(
+                user__id__exact=user.id)
             if hasattr(language_model, "language"):
                 return language_model.language
         except (ImportError, ImproperlyConfigured, model.DoesNotExist):
@@ -172,11 +179,11 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False):
             can_send = True
             # Make sure that on-site notifications are not sent
             # a second time by the emit_notices command
-            if delayed and identifier == 'site':
+            if delayed and identifier not in settings.QUEUED_NOTIFICATIONS:
                 can_send = False
-            # Make sure that email notifications are queued
+            # Make sure that email and mobile notifications are queued
             # unless the function is called by the emit_notices command
-            elif not delayed and identifier == 'email':
+            elif not delayed and identifier in settings.QUEUED_NOTIFICATIONS:
                 queue(users, label, extra_context, sender)
                 can_send = False
 
@@ -225,4 +232,5 @@ def queue(users, label, extra_context=None, sender=None):
     notices = []
     for user in users:
         notices.append((user, label, extra_context, sender))
-    NoticeQueueBatch(pickled_data=base64.b64encode(pickle.dumps(notices))).save()
+    NoticeQueueBatch(
+        pickled_data=base64.b64encode(pickle.dumps(notices))).save()
