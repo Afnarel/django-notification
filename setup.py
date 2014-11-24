@@ -23,7 +23,7 @@ setup(
     include_package_data=True,
     test_suite='runtests',
     install_requires=[
-        'django>=1.4',
+        'django=1.6.2',
     ],
     zip_safe=False,
 )
