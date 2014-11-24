@@ -4,6 +4,10 @@
 # from django.utils.translation import ugettext
 from notification import backends
 from ignilife.utils import devices_for
+import logging
+
+
+logger = logging.getLogger("ignilife")
 
 
 class MobileBackend(backends.BaseBackend):
@@ -14,9 +18,13 @@ class MobileBackend(backends.BaseBackend):
         target = get_mobile_redirect_on_notification(
             recipient, notice_type.label, extra_context.pop('target', None))
         for device in devices_for(recipient):
-            device.send_message(notice_type.description, extra={
-                "title": notice_type.display,
-                "target": target})
+            try:
+                device.send_message(notice_type.description, extra={
+                    "title": notice_type.display,
+                    "target": target})
+            except Exception, e:
+                logger.error("Error while sending mobile notification: %s" % (
+                    str(e),))
 
         # # If a target is given in the extra_context, retrieve it
         # target = extra_context.pop('target', None)
