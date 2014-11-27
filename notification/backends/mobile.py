@@ -25,7 +25,12 @@ class MobileBackend(backends.BaseBackend):
                     "target": target})
             except Exception, e:
                 logger.error("Error while sending mobile notification: %s" % (
-                    str(e),))
+                    str(e),), tags={
+                    'user_email': recipient.email,
+                    'user': recipient.username
+                    }, extra={
+                    'device_registration_id': device.registration_id
+                    })
 
         # # If a target is given in the extra_context, retrieve it
         # target = extra_context.pop('target', None)
