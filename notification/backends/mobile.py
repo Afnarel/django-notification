@@ -2,7 +2,9 @@
 
 # from django.template import Context
 # from django.utils.translation import ugettext
+# from django.contrib.contenttypes.models import ContentType
 from notification import backends
+from notifications.models import Notification
 from ignilife.utils import devices_for
 import logging
 
@@ -15,14 +17,32 @@ class MobileBackend(backends.BaseBackend):
     synchronous = False
 
     def deliver(self, recipient, sender, notice_type, extra_context):
-        from ignilife.management import get_mobile_redirect_on_notification
-        target = get_mobile_redirect_on_notification(
-            recipient, notice_type.label, extra_context.pop('target', None))
+        # from ignilife.management import get_mobile_redirect_on_notification
+        # target = get_mobile_redirect_on_notification(
+        #     recipient, notice_type.label, extra_context.pop('target', None),
+        #     sender)
+
+        # Get the corrseponding on-site notification based on
+        # its timestamp, sender, recipient, and notice_type
+        # user_ctype = ContentType.objects.get(app_label="auth", model="user")
+        try:
+            notif = Notification.objects.get(
+                timestamp=extra_context['timestamp'],
+                # actor_content_type=user_ctype, actor_object_id=sender.pk,
+                recipient=recipient, verb=notice_type.label)
+            notification_id = notif.pk
+        except Notification.DoesNotExist:
+            notification_id = None
+
         for device in devices_for(recipient):
             try:
-                device.send_message(notice_type.description, extra={
-                    "title": notice_type.display,
-                    "target": target})
+                device.send_message(
+                    notice_type.description,
+                    extra={
+                        "title": notice_type.display,
+                        # "target": target
+                        "notification_id": notification_id,
+                        "badge": 42})
             except Exception, e:
                 logger.error("Error while sending mobile notification: %s" % (
                     str(e),), extra={

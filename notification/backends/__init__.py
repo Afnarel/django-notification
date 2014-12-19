@@ -13,9 +13,10 @@ default_backends = [
 ]
 
 
-def load_backends():
+def load_backends(filters=None):
     backends = []
-    configured_backends = getattr(settings, "NOTIFICATION_BACKENDS", default_backends)
+    configured_backends = getattr(
+        settings, "NOTIFICATION_BACKENDS", default_backends)
     for medium_id, bits in enumerate(configured_backends):
         if len(bits) == 2:
             label, backend_path = bits
@@ -26,20 +27,24 @@ def load_backends():
             raise exceptions.ImproperlyConfigured(
                 "NOTIFICATION_BACKENDS does not contain enough data."
             )
-        dot = backend_path.rindex(".")
-        backend_mod, backend_class = backend_path[:dot], backend_path[dot + 1:]
-        try:
-            # import the module and get the module from sys.modules
-            __import__(backend_mod)
-            mod = sys.modules[backend_mod]
-        except ImportError as e:
-            raise exceptions.ImproperlyConfigured(
-                "Error importing notification backend {}: \"{}\"".format(backend_mod, e)
-            )
-        # add the backend label and an instantiated backend class to the
-        # backends list.
-        backend_instance = getattr(mod, backend_class)(medium_id, spam_sensitivity)
-        backends.append(((medium_id, label), backend_instance))
+        if filters is None or label in filters:
+            dot = backend_path.rindex(".")
+            backend_mod, backend_class = (backend_path[:dot],
+                                          backend_path[dot + 1:])
+            try:
+                # import the module and get the module from sys.modules
+                __import__(backend_mod)
+                mod = sys.modules[backend_mod]
+            except ImportError as e:
+                raise exceptions.ImproperlyConfigured(
+                    "Error importing notification backend {}: \"{}\"".format(
+                        backend_mod, e)
+                )
+            # add the backend label and an instantiated backend class to the
+            # backends list.
+            backend_instance = getattr(mod, backend_class)(
+                medium_id, spam_sensitivity)
+            backends.append(((medium_id, label), backend_instance))
     return dict(backends)
 
 

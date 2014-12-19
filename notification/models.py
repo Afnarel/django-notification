@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -15,6 +17,7 @@ from django.utils.six.moves import cPickle as pickle  # pylint: disable-msg=F
 from .compat import AUTH_USER_MODEL
 
 from notification import backends
+from django.utils.timezone import now
 
 
 DEFAULT_QUEUE_ALL = False
@@ -141,7 +144,8 @@ def get_notification_language(user):
     raise LanguageStoreNotAvailable
 
 
-def send_now(users, label, extra_context=None, sender=None, delayed=False):
+def send_now(users, label, extra_context=None, sender=None, delayed=False,
+             backends_filters=None):
     """
     Creates a new notice.
 
@@ -155,6 +159,11 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False):
     If delayed is True, then the function has been called from the
     emit_notices command.
     """
+    if backends_filters:
+        enabled_backends = backends.load_backends(filters=backends_filters)
+    else:
+        enabled_backends = NOTIFICATION_BACKENDS
+
     sent = False
     if extra_context is None:
         extra_context = {}
@@ -175,7 +184,7 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False):
             # activate the user's language
             activate(language)
 
-        for _identifier, backend in NOTIFICATION_BACKENDS.items():
+        for _identifier, backend in enabled_backends.items():
             # identifier = _identifier[1]
             can_send = False
             # The function has been called from the emit_notices command
@@ -204,6 +213,8 @@ def send(*args, **kwargs):
     * Sends the notification using every synchronous backend listed in
       the settings
     """
+    if len(args) > 2:
+        args[2].update({'timestamp': now()})
     queue(*args, **kwargs)
     return send_now(*args, **kwargs)
 
