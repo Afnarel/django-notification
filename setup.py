@@ -22,8 +22,6 @@ setup(
     ],
     include_package_data=True,
     test_suite='runtests',
-    install_requires=[
-        'Django==1.6.2',
-    ],
+    install_requires=[],
     zip_safe=False,
 )
