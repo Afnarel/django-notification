@@ -9,6 +9,7 @@ class NoticeTypeAdmin(admin.ModelAdmin):
 
 class NoticeSettingAdmin(admin.ModelAdmin):
     list_display = ["user", "notice_type", "medium", "send"]
+    search_fields = ['user__username']
 
 
 admin.site.register(NoticeQueueBatch)
