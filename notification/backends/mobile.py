@@ -38,11 +38,11 @@ class MobileBackend(backends.BaseBackend):
             try:
                 device.send_message(
                     notice_type.description,
+                    badge=recipient.notifications.filter(unread=True).count(),
                     extra={
                         "title": notice_type.display,
                         # "target": target
-                        "notification_id": notification_id,
-                        "badge": 42})
+                        "notification_id": notification_id})
             except Exception, e:
                 logger.error("Error while sending mobile notification: %s" % (
                     str(e),), extra={
