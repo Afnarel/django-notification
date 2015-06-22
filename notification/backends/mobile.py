@@ -36,13 +36,24 @@ class MobileBackend(backends.BaseBackend):
 
         for device in devices_for(recipient):
             try:
-                device.send_message(
-                    notice_type.description,
-                    badge=recipient.notifications.filter(unread=True).count(),
-                    extra={
-                        "title": notice_type.display,
-                        # "target": target
-                        "notification_id": notification_id})
+                if 'APNSDevice' in str(device.__class__):
+                    # If iOS device, send the badge (notifications count)
+                    device.send_message(
+                        notice_type.description,
+                        badge=recipient.notifications.filter(
+                            unread=True).count(),
+                        extra={
+                            "title": notice_type.display,
+                            # "target": target
+                            "notification_id": notification_id})
+                else:
+                    device.send_message(
+                        notice_type.description,
+                        extra={
+                            "title": notice_type.display,
+                            # "target": target
+                            "notification_id": notification_id})
+
             except Exception, e:
                 logger.error("Error while sending mobile notification: %s" % (
                     str(e),), extra={
