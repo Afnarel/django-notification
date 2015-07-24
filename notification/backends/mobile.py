@@ -54,7 +54,7 @@ class MobileBackend(backends.BaseBackend):
                             # "target": target
                             "notification_id": notification_id})
 
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error while sending mobile notification: %s" % (
                     str(e),), extra={
                     'tags': {
