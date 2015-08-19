@@ -235,5 +235,6 @@ def queue(users, label, extra_context=None, sender=None):
     notices = []
     for user in users:
         notices.append((user, label, extra_context, sender))
+    # Note: _dumps is slower than dumps but there is a problem with dumps
     NoticeQueueBatch(
-        pickled_data=base64.b64encode(pickle.dumps(notices))).save()
+        pickled_data=base64.b64encode(pickle._dumps(notices))).save()
