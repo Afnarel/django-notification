@@ -1,4 +1,4 @@
-from models import NOTICE_MEDIA, NoticeType, NoticeSetting
+from .models import NOTICE_MEDIA, NoticeType, NoticeSetting
 
 
 def can_send(user, notice_type_id, backend_name):
