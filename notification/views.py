@@ -2,7 +2,7 @@
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.contrib import messages
+from ignilife import messages
 from django.utils.translation import ugettext as _
 
 from django.contrib.auth.decorators import login_required
