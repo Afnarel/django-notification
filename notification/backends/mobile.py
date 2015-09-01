@@ -45,14 +45,14 @@ class MobileBackend(backends.BaseBackend):
                         extra={
                             "title": notice_type.display,
                             # "target": target
-                            "notification_id": notification_id})
+                            "notification_id": str(notification_id)})
                 else:
                     device.send_message(
                         notice_type.description,
                         extra={
                             "title": notice_type.display,
                             # "target": target
-                            "notification_id": notification_id})
+                            "notification_id": str(notification_id)})
 
             except Exception as e:
                 logger.error("Error while sending mobile notification: %s" % (
