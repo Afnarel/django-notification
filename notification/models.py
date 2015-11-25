@@ -44,7 +44,7 @@ class NoticeType(models.Model):
     description = models.CharField(_("description"), max_length=100)
 
     # By default only on for media with sensitivity less than or
-    # equal to this number
+    # equal to this number
     default = models.IntegerField(_("default"))
 
     def __str__(self):
@@ -123,6 +123,12 @@ class NoticeQueueBatch(models.Model):
     """
     pickled_data = models.TextField()
 
+    def deserialize(self):
+        return pickle.loads(base64.b64decode(self.pickled_data))[0]
+
+    # def __str__(self):
+    #     return self.deserialize()
+
 
 def get_notification_language(user):
     """
@@ -186,7 +192,7 @@ def send_now(users, label, extra_context=None, sender=None, delayed=False,
             activate(language)
 
         for _identifier, backend in enabled_backends.items():
-            # identifier = _identifier[1]
+            # identifier = _identifier[1]
             can_send = False
             # The function has been called from the emit_notices command
             # => we must send the notification for asynchronous backends
