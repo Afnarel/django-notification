@@ -56,3 +56,12 @@ def load_media_defaults(backends):
         media.append(key)
         defaults[key[0]] = backend.spam_sensitivity
     return media, defaults
+
+
+def id_for_medium(medium_name):
+    configured_backends = getattr(
+        settings, "NOTIFICATION_BACKENDS", default_backends)
+    for medium_id, bits in enumerate(configured_backends):
+        if bits[0] == medium_name:
+            return medium_id
+    return None
